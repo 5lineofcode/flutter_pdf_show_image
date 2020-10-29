@@ -43,7 +43,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   PdfImage pdfImage;
   Uint8List imageBit;
-
   initData() async {
     var data = await rootBundle.load('asset/img/dbz.jpg');
     imageBit = data.buffer.asUint8List();

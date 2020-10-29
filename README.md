@@ -1,16 +1,98 @@
-# flutter_pdf
+```
+import 'dart:io';
+import 'dart:typed_data';
 
-A new Flutter project.
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
-## Getting Started
+void main() {
+  runApp(MyApp());
+}
 
-This project is a starting point for a Flutter application.
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
+    );
+  }
+}
 
-A few resources to get you started if this is your first Flutter project:
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key key, this.title}) : super(key: key);
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+  final String title;
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    initData();
+  }
+
+  PdfImage pdfImage;
+  Uint8List imageBit;
+  initData() async {
+    var data = await rootBundle.load('asset/img/dbz.jpg');
+    imageBit = data.buffer.asUint8List();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: Container(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final doc = pw.Document();
+
+          doc.addPage(
+            pw.Page(
+              build: (pw.Context context) {
+                return pw.Row(
+                  children: [
+                    pw.Text(
+                      "Hello World",
+                      style: pw.TextStyle(
+                        fontSize: 30.0,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Image(PdfImage.file(
+                      doc.document,
+                      bytes: imageBit,
+                    )),
+                  ],
+                );
+              },
+            ),
+          );
+
+          final dir = await getExternalStorageDirectory();
+          final file = File('${dir.path}/example.pdf');
+          file.writeAsBytesSync(doc.save());
+
+          OpenFile.open(file.path);
+        },
+        tooltip: 'Increment',
+        child: Text("Create Pdf"),
+      ),
+    );
+  }
+}
+
+```
